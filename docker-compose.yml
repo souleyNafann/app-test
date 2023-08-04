@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  auth-api:
+    image: auth-api
+    build: ./auth-api
+    container_name: auth-api
+    working_dir: /var/www
+    volumes:
+      - ./auth-api:/var/www
+      - ./auth-apistorage/logs:/var/www/storage/logs
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+    networks:
+      - net
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - net
+  nginx:
+    image: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker-compose/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./auth-api:/var/www
+    depends_on:
+      - auth-api
+    networks:
+      - net
+networks:
+  net:
+    driver: bridge
+      
